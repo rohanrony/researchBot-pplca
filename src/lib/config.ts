@@ -47,6 +47,25 @@ interface Config {
   API_ENDPOINTS: {
     SEARXNG: string;
   };
+  AUTH: {
+    NEXTAUTH_URL: string;
+    NEXTAUTH_SECRET: string;
+    GOOGLE: {
+      CLIENT_ID: string;
+      CLIENT_SECRET: string;
+    };
+  };
+  DATABASE: {
+    URL: string;
+  };
+  EMAIL: {
+    RESEND_API_KEY: string;
+    EMAIL_FROM: string;
+    EMAIL_TO: string;
+  };
+  REDIS: {
+    URL: string;
+  };
 }
 
 type RecursivePartial<T> = {
@@ -96,6 +115,26 @@ export const getCustomOpenaiModelName = () =>
 
 export const getLMStudioApiEndpoint = () =>
   loadConfig().MODELS.LM_STUDIO.API_URL;
+
+// New functions for added configuration keys
+export const getNextAuthUrl = () => loadConfig().AUTH.NEXTAUTH_URL;
+
+export const getNextAuthSecret = () => loadConfig().AUTH.NEXTAUTH_SECRET;
+
+export const getGoogleClientId = () => loadConfig().AUTH.GOOGLE.CLIENT_ID;
+
+export const getGoogleClientSecret = () =>
+  loadConfig().AUTH.GOOGLE.CLIENT_SECRET;
+
+export const getDatabaseUrl = () => loadConfig().DATABASE.URL;
+
+export const getEmailResendApiKey = () => loadConfig().EMAIL.RESEND_API_KEY;
+
+export const getEmailFrom = () => loadConfig().EMAIL.EMAIL_FROM;
+
+export const getEmailTo = () => loadConfig().EMAIL.EMAIL_TO;
+
+export const getRedisUrl = () => loadConfig().REDIS.URL;
 
 const mergeConfigs = (current: any, update: any): any => {
   if (update === null || update === undefined) {

@@ -29,3 +29,36 @@ export const getSuggestions = async (chatHisory: Message[]) => {
 
   return data.suggestions;
 };
+
+export const fetchHtmlPlot = async () => {
+  try {
+    // hit our rate‑limited API
+    const res = await fetch('/api/plot');
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || `${res.status} ${res.statusText}`);
+    }
+    return await res.text();
+  } catch (error) {
+    console.error('Error fetching plot:', error);
+    throw error;
+  }
+};
+
+export const savePlotData = async (messageId: string, plotData: string) => {
+  try {
+    console.debug('Attempting to save plot data:', { messageId, plotData });
+    const response = await fetch('/api/plot', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messageId,
+        plotData,
+      }),
+    });
+    console.debug('Response from saving plot data:', response);
+  } catch (error) {
+    console.error('Error saving plot data:', error);
+    throw error;
+  }
+};

@@ -8,10 +8,11 @@ import EmptyChat from './EmptyChat';
 import crypto from 'crypto';
 import { toast } from 'sonner';
 import { useSearchParams } from 'next/navigation';
-import { getSuggestions } from '@/lib/actions';
+import { fetchHtmlPlot, getSuggestions, savePlotData } from '@/lib/actions';
 import { Settings } from 'lucide-react';
 import Link from 'next/link';
 import NextError from 'next/error';
+import { usePlotStore } from '@/stores/plotStore';
 
 export type Message = {
   messageId: string;
@@ -21,6 +22,8 @@ export type Message = {
   role: 'user' | 'assistant';
   suggestions?: string[];
   sources?: Document[];
+  isPlot?: boolean;
+  plotData?: string;
 };
 
 export interface File {
@@ -287,6 +290,10 @@ const ChatWindow = ({ id }: { id?: string }) => {
 
   const [notFound, setNotFound] = useState(false);
 
+  const [isPlot, setIsPlot] = useState(false);
+  const [plotData, setPlotData] = useState<any>(null);
+  const plotEnabled = usePlotStore((state) => state.plotEnabled);
+
   useEffect(() => {
     if (
       chatId &&
@@ -419,6 +426,19 @@ const ChatWindow = ({ id }: { id?: string }) => {
 
         setLoading(false);
 
+        // // Check if the last user message contains 'plot'
+        // const allMessages = messagesRef.current;
+        // const lastUserMessage = allMessages
+        //   .filter((msg) => msg.role === 'user')
+        //   .pop();
+        // const lastAssistantMessage = allMessages
+        //   .filter((msg) => msg.role === 'assistant')
+        //   .pop();
+
+        if (plotEnabled) {
+          handlePlotRequest();
+        }
+
         const lastMsg = messagesRef.current[messagesRef.current.length - 1];
 
         const autoImageSearch = localStorage.getItem('autoImageSearch');
@@ -481,6 +501,7 @@ const ChatWindow = ({ id }: { id?: string }) => {
           provider: embeddingModelProvider.provider,
         },
         systemInstructions: localStorage.getItem('systemInstructions'),
+        plotEnabled: plotEnabled,
       }),
     });
 
@@ -528,6 +549,58 @@ const ChatWindow = ({ id }: { id?: string }) => {
     sendMessage(message.content, message.messageId);
   };
 
+  const handlePlotRequest = async function () {
+    const statRes = await fetch('/api/plot/status');
+    const { remaining, resetAt } = await statRes.json();
+
+    // if you have plots remaining, only then fetch the plot
+    // otherwise, show the error message
+    // subtract 1 from remaining to account for the current request
+    const left = remaining === 0 ? 0 : remaining - 1;
+    if (remaining > 0) {
+      toast.success(
+        `You have ${remaining - 1} plot generation${remaining - 1 > 1 ? 's' : ''} remaining today.`,
+      );
+
+      try {
+        const plot = await fetchHtmlPlot();
+        if (plot) {
+          setIsPlot(true);
+          setPlotData(plot);
+          const lastAssistant = messagesRef.current
+            .filter((m) => m.role === 'assistant')
+            .pop();
+          if (lastAssistant) {
+            await savePlotData(lastAssistant.messageId, plot);
+          }
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error('Failed to generate plot');
+      }
+    } else {
+      const resetDate = new Date(resetAt);
+      toast.error(
+        `You’ve used up all your plots. Next plot available at ${resetDate.toLocaleString()}.`,
+      );
+    }
+  };
+
+  const getPlotStatus = async () => {
+    try {
+      const response = await fetch('/api/plot/status');
+      if (!response.ok) {
+        throw new Error('Failed to fetch plot status');
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error fetching plot status:', error);
+      toast.error('Failed to fetch plot status');
+      return { used: -1, remaining: 0, resetAt: null };
+    }
+  };
+
   useEffect(() => {
     if (isReady && initialMessage && isConfigReady) {
       sendMessage(initialMessage);
@@ -570,6 +643,8 @@ const ChatWindow = ({ id }: { id?: string }) => {
               setFileIds={setFileIds}
               files={files}
               setFiles={setFiles}
+              isPlot={isPlot}
+              plotData={plotData}
             />
           </>
         ) : (
@@ -583,6 +658,7 @@ const ChatWindow = ({ id }: { id?: string }) => {
             setFileIds={setFileIds}
             files={files}
             setFiles={setFiles}
+            creditStatus={getPlotStatus}
           />
         )}
       </div>

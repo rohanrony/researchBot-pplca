@@ -3,6 +3,7 @@ import EmptyChatMessageInput from './EmptyChatMessageInput';
 import { useState } from 'react';
 import { File } from './ChatWindow';
 import Link from 'next/link';
+import { AuroraText } from './ui/hero-text';
 
 const EmptyChat = ({
   sendMessage,
@@ -14,6 +15,7 @@ const EmptyChat = ({
   setFileIds,
   files,
   setFiles,
+  creditStatus,
 }: {
   sendMessage: (message: string) => void;
   focusMode: string;
@@ -24,6 +26,7 @@ const EmptyChat = ({
   setFileIds: (fileIds: string[]) => void;
   files: File[];
   setFiles: (files: File[]) => void;
+  creditStatus: () => any;
 }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
@@ -35,9 +38,9 @@ const EmptyChat = ({
         </Link>
       </div>
       <div className="flex flex-col items-center justify-center min-h-screen max-w-screen-sm mx-auto p-2 space-y-8">
-        <h2 className="text-black/70 dark:text-white/70 text-3xl font-medium -mt-8">
-          Research begins here.
-        </h2>
+        <h1 className="text-4xl font-bold md:text-5xl lg:text-5xl">
+          Research <AuroraText>begins</AuroraText> Here
+        </h1>
         <EmptyChatMessageInput
           sendMessage={sendMessage}
           focusMode={focusMode}
@@ -48,6 +51,7 @@ const EmptyChat = ({
           setFileIds={setFileIds}
           files={files}
           setFiles={setFiles}
+          creditStatus={creditStatus}
         />
       </div>
     </div>

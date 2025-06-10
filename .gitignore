@@ -37,3 +37,9 @@ Thumbs.db
 # Db
 db.sqlite
 /searxng
+
+#custom
+plotly_output/
+summrized-repo.txt
+temp*
+docker-compose.override.yaml

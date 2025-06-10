@@ -50,6 +50,7 @@ type Body = {
   chatModel: ChatModel;
   embeddingModel: EmbeddingModel;
   systemInstructions: string;
+  plotEnabled: boolean;
 };
 
 const handleEmitterEvents = async (
@@ -58,6 +59,7 @@ const handleEmitterEvents = async (
   encoder: TextEncoder,
   aiMessageId: string,
   chatId: string,
+  plotEnabled: boolean,
 ) => {
   let recievedMessage = '';
   let sources: any[] = [];
@@ -110,6 +112,7 @@ const handleEmitterEvents = async (
         metadata: JSON.stringify({
           createdAt: new Date(),
           ...(sources && sources.length > 0 && { sources }),
+          isPlot: plotEnabled,
         }),
       })
       .execute();
@@ -184,7 +187,7 @@ const handleHistorySave = async (
 export const POST = async (req: Request) => {
   try {
     const body = (await req.json()) as Body;
-    const { message } = body;
+    const { message, plotEnabled } = body;
 
     if (message.content === '') {
       return Response.json(
@@ -286,7 +289,14 @@ export const POST = async (req: Request) => {
     const writer = responseStream.writable.getWriter();
     const encoder = new TextEncoder();
 
-    handleEmitterEvents(stream, writer, encoder, aiMessageId, message.chatId);
+    handleEmitterEvents(
+      stream,
+      writer,
+      encoder,
+      aiMessageId,
+      message.chatId,
+      plotEnabled,
+    );
     handleHistorySave(message, humanMessageId, body.focusMode, body.files);
 
     return new Response(responseStream.readable, {

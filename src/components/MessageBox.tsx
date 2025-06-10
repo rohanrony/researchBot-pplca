@@ -20,6 +20,7 @@ import SearchImages from './SearchImages';
 import SearchVideos from './SearchVideos';
 import { useSpeech } from 'react-text-to-speech';
 import ThinkBox from './ThinkBox';
+import { PlotlyEmbed } from './PlotEmbed';
 
 const ThinkTagProcessor = ({ children }: { children: React.ReactNode }) => {
   return <ThinkBox content={children as string} />;
@@ -34,6 +35,8 @@ const MessageBox = ({
   isLast,
   rewrite,
   sendMessage,
+  isPlot,
+  plotData,
 }: {
   message: Message;
   messageIndex: number;
@@ -43,6 +46,8 @@ const MessageBox = ({
   isLast: boolean;
   rewrite: (messageId: string) => void;
   sendMessage: (message: string) => void;
+  isPlot: boolean;
+  plotData: string;
 }) => {
   const [parsedMessage, setParsedMessage] = useState(message.content);
   const [speechMessage, setSpeechMessage] = useState(message.content);
@@ -171,6 +176,13 @@ const MessageBox = ({
               >
                 {parsedMessage}
               </Markdown>
+
+              {/* Render the Plotly HTML when applicable */}
+              {isPlot && plotData && (
+                <div className="mt-6">
+                  <PlotlyEmbed htmlString={plotData} />
+                </div>
+              )}
               {loading && isLast ? null : (
                 <div className="flex flex-row items-center justify-between w-full text-black dark:text-white py-4 -mx-2">
                   <div className="flex flex-row items-center space-x-1">
