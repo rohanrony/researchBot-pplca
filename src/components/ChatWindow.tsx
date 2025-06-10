@@ -208,9 +208,25 @@ const loadMessages = async (
   const data = await res.json();
 
   const messages = data.messages.map((msg: any) => {
+    let metadata = {};
+    
+    // Check if metadata exists and handle both string and object cases
+    if (msg.metadata) {
+      if (typeof msg.metadata === 'string') {
+        try {
+          metadata = JSON.parse(msg.metadata);
+        } catch (error) {
+          console.warn('Failed to parse metadata:', error);
+          metadata = {};
+        }
+      } else {
+        metadata = msg.metadata;
+      }
+    }
+    
     return {
       ...msg,
-      ...JSON.parse(msg.metadata),
+      ...metadata,
     };
   }) as Message[];
 

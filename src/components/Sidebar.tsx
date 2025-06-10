@@ -72,7 +72,7 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
       {' '}
       {/* min-h-0 allows flex child to shrink */}
       <div className="flex h-full w-full flex-1 flex-col gap-2 rounded-tl-2xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900 overflow-hidden">
-        <div className="flex-1">
+        <div className="flex-1 overflow-y-auto">
           {' '}
           {/* This div handles the scrolling */}
           <Layout>{children}</Layout>

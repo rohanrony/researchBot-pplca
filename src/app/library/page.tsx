@@ -34,7 +34,7 @@ const getFocusModeIcon = (focusMode: string) => {
 };
 
 const getFocusModeColor = (focusMode: string) => {
-  console.log(focusMode);
+  
   switch (focusMode.toLowerCase()) {
     case 'academicsearch':
       return 'bg-gradient-to-br from-blue-600 to-blue-800';

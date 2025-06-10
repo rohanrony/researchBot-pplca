@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth/auth'; 
+import { auth } from '@/auth/auth';
 import { checkRateLimit } from '@/lib/redis/rateLimit';
 import fs from 'fs/promises';
 import path from 'path';
@@ -43,24 +43,60 @@ import { eq, sql } from 'drizzle-orm';
 
 export const POST = async (req: Request) => {
   console.debug('POST /plot request received');
+
   try {
     const body = await req.json();
-    console.debug('Request body parsed:', body);
     const { messageId, plotData } = body;
-    console.debug('Updating message with ID:', messageId, 'with plotData:', plotData);
-    
+
+    // Validate required fields
+    if (!messageId || !plotData) {
+      return new Response('Missing messageId or plotData', { status: 400 });
+    }
+
+    // First, check if the record exists and get current metadata
+    const existingRecord = await db
+      .select({ metadata: messagesSchema.metadata })
+      .from(messagesSchema)
+      .where(eq(messagesSchema.messageId, messageId))
+      .limit(1)
+      .execute();
+
+    if (existingRecord.length === 0) {
+      return new Response('Message not found', { status: 404 });
+    }
+
+    // Prepare the new metadata - properly parse JSON string
+    const currentMetadata = existingRecord[0].metadata
+      ? typeof existingRecord[0].metadata === 'string'
+        ? JSON.parse(existingRecord[0].metadata)
+        : existingRecord[0].metadata
+      : {};
+
+    const updatedMetadata = {
+      ...currentMetadata,
+      plotData: plotData,
+    };
+
+    // Update with the merged metadata
     const result = await db
       .update(messagesSchema)
       .set({
-        metadata: sql`json_set(metadata, '$.plotData', ${plotData})`,
+        metadata: updatedMetadata,
       })
       .where(eq(messagesSchema.messageId, messageId))
+      .returning({ metadata: messagesSchema.metadata })
       .execute();
-      
-    console.debug('Database update result:', result);
-    return new Response(null, { status: 204 });
+
+    // console.debug('Database update result:', result);
+
+    if (result.length > 0) {
+      // console.debug('Updated metadata:', result[0].metadata);
+      return new Response(null, { status: 204 });
+    } else {
+      return new Response('Update failed', { status: 500 });
+    }
   } catch (err) {
     console.error('Failed to save plot data:', err);
-    return new Response('Error', { status: 500 });
+    return new Response(`Error: ${err.message}`, { status: 500 });
   }
 };

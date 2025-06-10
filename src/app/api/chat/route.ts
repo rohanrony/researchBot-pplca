@@ -103,6 +103,18 @@ const handleEmitterEvents = async (
     );
     writer.close();
 
+    // console.debug('Saving message to database:', {
+    //   content: recievedMessage,
+    //   chatId: chatId,
+    //   messageId: aiMessageId,
+    //   role: 'assistant',
+    //   metadata: {
+    //     createdAt: new Date(),
+    //     ...(sources && sources.length > 0 && { sources }),
+    //     isPlot: plotEnabled,
+    //   },
+    // });
+
     db.insert(messagesSchema)
       .values({
         content: recievedMessage,

@@ -47,7 +47,6 @@ export const fetchHtmlPlot = async () => {
 
 export const savePlotData = async (messageId: string, plotData: string) => {
   try {
-    console.debug('Attempting to save plot data:', { messageId, plotData });
     const response = await fetch('/api/plot', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -56,7 +55,6 @@ export const savePlotData = async (messageId: string, plotData: string) => {
         plotData,
       }),
     });
-    console.debug('Response from saving plot data:', response);
   } catch (error) {
     console.error('Error saving plot data:', error);
     throw error;

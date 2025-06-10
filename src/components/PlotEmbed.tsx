@@ -221,33 +221,25 @@ export function PlotlyEmbed({ htmlString }: { htmlString: string }) {
                   </svg>
                 </button>
               </div>
-              <div
+                <div
                 className="modal-body"
                 style={{
                   position: 'relative',
                   width: '100%',
+                  height: '100%',
                   overflow: 'hidden',  
                   filter: 'invert(1)',              
                 }}
-              >
+                >
                 <iframe
-
-                  ref={(iframe) => {
-                    if (iframe && htmlString) {
-                      // Wait for iframe to load before writing content
-                      iframe.onload = () => {
-                        const doc =
-                          iframe.contentDocument ||
-                          iframe.contentWindow?.document;
-                        if (doc) {
-                          doc.open();
-                          doc.write(htmlString);
-                          doc.close();
-
-                          // Add responsive styling to the iframe content
-                          if (doc.head) {
-                            const style = doc.createElement('style');
-                            style.textContent = `
+                  srcDoc={htmlString}
+                  onLoad={(e) => {
+                  const iframe = e.currentTarget;
+                  const doc = iframe.contentDocument || iframe.contentWindow?.document;
+                  if (doc) {
+                    if (doc.head) {
+                    const style = doc.createElement('style');
+                    style.textContent = `
                 body, html {
                   margin: 0;
                   padding: 0;
@@ -259,56 +251,45 @@ export function PlotlyEmbed({ htmlString }: { htmlString: string }) {
                   width: 100% !important;
                   height: 100% !important;
                 }
-              `;
-                            doc.head.appendChild(style);
-                          }
-
-                          // Force resize Plotly after iframe content loads
-                          if (iframe.contentWindow?.Plotly) {
-                            const resizePlotly = () => {
-                              try {
-                                const plot =
-                                  doc.querySelector('.js-plotly-plot');
-                                if (plot && iframe.contentWindow)
-                                  iframe.contentWindow.Plotly.Plots.resize(
-                                    plot,
-                                  );
-                              } catch (e) {
-                                console.error(
-                                  'Error resizing Plotly in iframe:',
-                                  e,
-                                );
-                              }
-                            };
-
-                            // Initial resize
-                            setTimeout(resizePlotly, 300);
-
-                            // Add resize listener
-                            const resizeObserver = new ResizeObserver(() => {
-                              resizePlotly();
-                            });
-
-                            if (iframe.parentElement) {
-                              resizeObserver.observe(iframe.parentElement);
-                            }
-                          }
-                        }
-                      };
+                `;
+                    doc.head.appendChild(style);
                     }
+
+                    if (iframe.contentWindow?.Plotly) {
+                    const resizePlotly = () => {
+                      try {
+                      const plot = doc.querySelector('.js-plotly-plot');
+                      if (plot && iframe.contentWindow)
+                        iframe.contentWindow.Plotly.Plots.resize(plot);
+                      } catch (e) {
+                      console.error('Error resizing Plotly in iframe:', e);
+                      }
+                    };
+
+                    // Initial resize
+                    setTimeout(resizePlotly, 300);
+
+                    // Add resize listener
+                    const resizeObserver = new ResizeObserver(() => {
+                      resizePlotly();
+                    });
+
+                    if (iframe.parentElement) {
+                      resizeObserver.observe(iframe.parentElement);
+                    }
+                    }
+                  }
                   }}
                   className="plotly-iframe"
                   style={{
-                    width: '100%',
-                    height: '100%',
-                    minHeight: '400px',
-                    maxHeight: '80vh',
-                    border: 'none',
-                    display: 'block',
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                  display: 'block',
                   }}
                   title="Interactive Plot"
                 />
-              </div>{' '}
+                </div>{' '}
             </div>
           </div>,
           document.body,
