@@ -1,9 +1,10 @@
 import { Settings } from 'lucide-react';
 import EmptyChatMessageInput from './EmptyChatMessageInput';
-import { useState } from 'react';
 import { File } from './ChatWindow';
 import Link from 'next/link';
 import { AuroraText } from './ui/hero-text';
+import WeatherWidget from './WeatherWidget';
+import NewsArticleWidget from './NewsArticleWidget';
 
 const EmptyChat = ({
   sendMessage,
@@ -28,8 +29,6 @@ const EmptyChat = ({
   setFiles: (files: File[]) => void;
   creditStatus: () => any;
 }) => {
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-
   return (
     <div className="relative">
       <div className="absolute w-full flex flex-row items-center justify-end mr-5 mt-5">
