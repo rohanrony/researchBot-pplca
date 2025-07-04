@@ -16,6 +16,8 @@ const Chat = ({
   setFileIds,
   files,
   setFiles,
+  isPlot,
+  plotData,
 }: {
   messages: Message[];
   sendMessage: (message: string) => void;
@@ -26,6 +28,8 @@ const Chat = ({
   setFileIds: (fileIds: string[]) => void;
   files: File[];
   setFiles: (files: File[]) => void;
+  isPlot: boolean;
+  plotData: string;
 }) => {
   const [dividerWidth, setDividerWidth] = useState(0);
   const dividerRef = useRef<HTMLDivElement | null>(null);
@@ -60,12 +64,13 @@ const Chat = ({
       scroll();
     }
   }, [messages]);
-
+  
   return (
     <div className="flex flex-col space-y-6 pt-8 pb-44 lg:pb-32 sm:mx-4 md:mx-8">
       {messages.map((msg, i) => {
         const isLast = i === messages.length - 1;
-
+        
+        
         return (
           <Fragment key={msg.messageId}>
             <MessageBox
@@ -78,6 +83,8 @@ const Chat = ({
               isLast={isLast}
               rewrite={rewrite}
               sendMessage={sendMessage}
+              isPlot={msg.isPlot || isPlot}
+              plotData={msg.plotData || plotData}
             />
             {!isLast && msg.role === 'assistant' && (
               <div className="h-px w-full bg-light-secondary dark:bg-dark-secondary" />

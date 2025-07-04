@@ -1,98 +1,140 @@
 'use client';
 
-import { cn } from '@/lib/utils';
+import React, { useState } from 'react';
 import { BookOpenText, Home, Search, SquarePen, Settings } from 'lucide-react';
-import Link from 'next/link';
 import { useSelectedLayoutSegments } from 'next/navigation';
-import React, { useState, type ReactNode } from 'react';
+import { FloatingDock } from './ui/FloatingDock';
 import Layout from './Layout';
+import {
+  SidebarProvider,
+  Sidebar as NewSidebar,
+  SidebarBody,
+  useSidebar,
+} from './ui/sidebar_new';
+import { motion } from 'motion/react';
+import { cn } from '@/lib/utils';
+import FileExplorer from './file-explorer';
 
-const VerticalIconContainer = ({ children }: { children: ReactNode }) => {
+export const Logo = () => {
   return (
-    <div className="flex flex-col items-center gap-y-3 w-full">{children}</div>
+    <a
+      href="#"
+      className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
+    >
+      <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
+      <motion.span
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="font-medium whitespace-pre text-black dark:text-white"
+      >
+        Perplexica
+      </motion.span>
+    </a>
+  );
+};
+
+export const LogoIcon = () => {
+  return (
+    <a
+      href="#"
+      className="relative z-20 flex items-center space-x-2 py-1 text-sm font-normal text-black"
+    >
+      <div className="h-5 w-6 shrink-0 rounded-tl-lg rounded-tr-sm rounded-br-lg rounded-bl-sm bg-black dark:bg-white" />
+    </a>
+  );
+};
+
+const BorderFloatingDock = ({
+  navItems,
+  open,
+}: {
+  navItems: any[];
+  open: boolean;
+}) => {
+  return (
+    <motion.div
+      className="fixed top-1/2 -translate-y-1/2 z-50 hidden md:block"
+      // animate={{
+      //   marginLeft: open ? '280px' : '30px', // Adjust based on sidebar width
+      // }}
+    >
+      <FloatingDock items={navItems} open={open} />
+    </motion.div>
+  );
+};
+
+// Main content wrapper with proper scrolling
+const MainContent = ({ children }: { children: React.ReactNode }) => {
+  const { open } = useSidebar();
+
+  return (
+    <div className="flex flex-1 min-h-0">
+      {' '}
+      {/* min-h-0 allows flex child to shrink */}
+      <div className="flex h-full w-full flex-1 flex-col gap-2 rounded-tl-2xl border border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900 overflow-hidden">
+        <div className="flex-1 overflow-y-auto">
+          {' '}
+          {/* This div handles the scrolling */}
+          <Layout>{children}</Layout>
+        </div>
+      </div>
+    </div>
   );
 };
 
 const Sidebar = ({ children }: { children: React.ReactNode }) => {
   const segments = useSelectedLayoutSegments();
+  const [open, setOpen] = useState(false);
 
-  const navLinks = [
+  // Define navigation items for the dock
+  const navItems = [
     {
-      icon: Home,
+      title: 'Write',
+      icon: <SquarePen className="h-5 w-5" />,
+      href: '/',
+      active: false,
+    },
+    {
+      title: 'Home',
+      icon: <Home className="h-5 w-5" />,
       href: '/',
       active: segments.length === 0 || segments.includes('c'),
-      label: 'Home',
     },
     {
-      icon: Search,
+      title: 'Discover',
+      icon: <Search className="h-5 w-5" />,
       href: '/discover',
       active: segments.includes('discover'),
-      label: 'Discover',
     },
     {
-      icon: BookOpenText,
+      title: 'Library',
+      icon: <BookOpenText className="h-5 w-5" />,
       href: '/library',
       active: segments.includes('library'),
-      label: 'Library',
+    },
+    {
+      title: 'Settings',
+      icon: <Settings className="h-5 w-5" />,
+      href: '/settings',
+      active: segments.includes('settings'),
     },
   ];
 
   return (
-    <div>
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-20 lg:flex-col">
-        <div className="flex grow flex-col items-center justify-between gap-y-5 overflow-y-auto bg-light-secondary dark:bg-dark-secondary px-2 py-8">
-          <a href="/">
-            <SquarePen className="cursor-pointer" />
-          </a>
-          <VerticalIconContainer>
-            {navLinks.map((link, i) => (
-              <Link
-                key={i}
-                href={link.href}
-                className={cn(
-                  'relative flex flex-row items-center justify-center cursor-pointer hover:bg-black/10 dark:hover:bg-white/10 duration-150 transition w-full py-2 rounded-lg',
-                  link.active
-                    ? 'text-black dark:text-white'
-                    : 'text-black/70 dark:text-white/70',
-                )}
-              >
-                <link.icon />
-                {link.active && (
-                  <div className="absolute right-0 -mr-2 h-full w-1 rounded-l-lg bg-black dark:bg-white" />
-                )}
-              </Link>
-            ))}
-          </VerticalIconContainer>
-
-          <Link href="/settings">
-            <Settings className="cursor-pointer" />
-          </Link>
-        </div>
+    <SidebarProvider>
+      <div
+        className={cn(
+          'flex w-full flex-1 flex-col overflow-hidden bg-gray-100 md:flex-row dark:bg-neutral-900',
+          'h-screen', // Full height container
+        )}
+      >
+        
+        
+        {/* Floating dock at sidebar border */}
+        <BorderFloatingDock navItems={navItems} open={open} />
+        <MainContent>{children}</MainContent>
       </div>
-
-      <div className="fixed bottom-0 w-full z-50 flex flex-row items-center gap-x-6 bg-light-primary dark:bg-dark-primary px-4 py-4 shadow-sm lg:hidden">
-        {navLinks.map((link, i) => (
-          <Link
-            href={link.href}
-            key={i}
-            className={cn(
-              'relative flex flex-col items-center space-y-1 text-center w-full',
-              link.active
-                ? 'text-black dark:text-white'
-                : 'text-black dark:text-white/70',
-            )}
-          >
-            {link.active && (
-              <div className="absolute top-0 -mt-4 h-1 w-full rounded-b-lg bg-black dark:bg-white" />
-            )}
-            <link.icon />
-            <p className="text-xs">{link.label}</p>
-          </Link>
-        ))}
-      </div>
-
-      <Layout>{children}</Layout>
-    </div>
+    </SidebarProvider>
   );
 };
 

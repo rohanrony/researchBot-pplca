@@ -8,6 +8,8 @@ RUN yarn install --frozen-lockfile --network-timeout 600000
 COPY tsconfig.json next.config.mjs next-env.d.ts postcss.config.js drizzle.config.ts tailwind.config.ts ./
 COPY src ./src
 COPY public ./public
+# Copy config.toml BEFORE the build command
+COPY config.toml ./config.toml
 
 RUN mkdir -p /home/perplexica/data
 RUN yarn build
@@ -27,6 +29,7 @@ COPY --from=builder /home/perplexica/data ./data
 COPY drizzle ./drizzle
 COPY --from=builder /home/perplexica/migrator/build ./build
 COPY --from=builder /home/perplexica/migrator/index.js ./migrate.js
+COPY --from=builder /home/perplexica/config.toml ./config.toml
 
 RUN mkdir /home/perplexica/uploads
 

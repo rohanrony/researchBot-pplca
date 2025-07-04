@@ -1,13 +1,15 @@
 import type { Metadata } from 'next';
-import { Montserrat } from 'next/font/google';
+import Script from 'next/script';
+import { Instrument_Sans } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import Sidebar from '@/components/Sidebar';
 import { Toaster } from 'sonner';
 import ThemeProvider from '@/components/theme/Provider';
+import { SessionProvider } from 'next-auth/react';
 
-const montserrat = Montserrat({
-  weight: ['300', '400', '500', '700'],
+const instrumentSans = Instrument_Sans({
+  weight: ['400', '500', '700'],
   subsets: ['latin'],
   display: 'swap',
   fallback: ['Arial', 'sans-serif'],
@@ -26,18 +28,28 @@ export default function RootLayout({
 }>) {
   return (
     <html className="h-full" lang="en" suppressHydrationWarning>
-      <body className={cn('h-full', montserrat.className)}>
+      <head>
+        <Script
+          src="https://cdn.plot.ly/plotly-3.0.1.min.js"
+          strategy="beforeInteractive"
+        />
+      </head>
+      <body
+        className={cn('h-full dark:bg-neutral-900', instrumentSans.className)}
+      >
         <ThemeProvider>
-          <Sidebar>{children}</Sidebar>
-          <Toaster
-            toastOptions={{
-              unstyled: true,
-              classNames: {
-                toast:
-                  'bg-light-primary dark:bg-dark-secondary dark:text-white/70 text-black-70 rounded-lg p-4 flex flex-row items-center space-x-2',
-              },
-            }}
-          />
+          <SessionProvider>
+            <Sidebar>{children}</Sidebar>
+            <Toaster
+              toastOptions={{
+                unstyled: true,
+                classNames: {
+                  toast:
+                    'bg-light-primary dark:bg-dark-secondary dark:text-white/70 text-black-70 rounded-lg p-4 flex flex-row items-center space-x-2',
+                },
+              }}
+            />
+          </SessionProvider>
         </ThemeProvider>
       </body>
     </html>

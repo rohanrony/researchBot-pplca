@@ -14,9 +14,12 @@ services:
     build:
       context: .
       dockerfile: app.dockerfile
+    env_file:
+      - .env
     environment:
       - SEARXNG_API_URL=http://searxng:8080
       - DATA_DIR=/home/perplexica
+      - REDIS_URL=redis://localhost:6380
     ports:
       - 3000:3000
     networks:
@@ -25,6 +28,14 @@ services:
       - backend-dbstore:/home/perplexica/data
       - uploads:/home/perplexica/uploads
       - ./config.toml:/home/perplexica/config.toml
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    ports:
+      - 6380:6379
+    networks:
+      - perplexica-network
     restart: unless-stopped
 
 networks:

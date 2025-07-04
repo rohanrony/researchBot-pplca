@@ -2,6 +2,7 @@ import { Settings } from 'lucide-react';
 import EmptyChatMessageInput from './EmptyChatMessageInput';
 import { File } from './ChatWindow';
 import Link from 'next/link';
+import { AuroraText } from './ui/hero-text';
 import WeatherWidget from './WeatherWidget';
 import NewsArticleWidget from './NewsArticleWidget';
 
@@ -15,6 +16,7 @@ const EmptyChat = ({
   setFileIds,
   files,
   setFiles,
+  creditStatus,
 }: {
   sendMessage: (message: string) => void;
   focusMode: string;
@@ -25,6 +27,7 @@ const EmptyChat = ({
   setFileIds: (fileIds: string[]) => void;
   files: File[];
   setFiles: (files: File[]) => void;
+  creditStatus: () => any;
 }) => {
   return (
     <div className="relative">
@@ -33,31 +36,22 @@ const EmptyChat = ({
           <Settings className="cursor-pointer lg:hidden" />
         </Link>
       </div>
-      <div className="flex flex-col items-center justify-center min-h-screen max-w-screen-sm mx-auto p-2 space-y-4">
-        <div className="flex flex-col items-center justify-center w-full space-y-8">
-          <h2 className="text-black/70 dark:text-white/70 text-3xl font-medium -mt-8">
-            Research begins here.
-          </h2>
-          <EmptyChatMessageInput
-            sendMessage={sendMessage}
-            focusMode={focusMode}
-            setFocusMode={setFocusMode}
-            optimizationMode={optimizationMode}
-            setOptimizationMode={setOptimizationMode}
-            fileIds={fileIds}
-            setFileIds={setFileIds}
-            files={files}
-            setFiles={setFiles}
-          />
-        </div>
-        <div className="flex flex-col w-full gap-4 mt-2 sm:flex-row sm:justify-center">
-          <div className="flex-1 max-w-xs">
-            <WeatherWidget />
-          </div>
-          <div className="flex-1 max-w-xs">
-            <NewsArticleWidget />
-          </div>
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-screen max-w-screen-sm mx-auto p-2 space-y-8">
+        <h1 className="text-4xl font-bold md:text-5xl lg:text-5xl">
+          Research <AuroraText>begins</AuroraText> Here
+        </h1>
+        <EmptyChatMessageInput
+          sendMessage={sendMessage}
+          focusMode={focusMode}
+          setFocusMode={setFocusMode}
+          optimizationMode={optimizationMode}
+          setOptimizationMode={setOptimizationMode}
+          fileIds={fileIds}
+          setFileIds={setFileIds}
+          files={files}
+          setFiles={setFiles}
+          creditStatus={creditStatus}
+        />
       </div>
     </div>
   );
